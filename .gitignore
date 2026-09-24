@@ -1,0 +1,24 @@
+# Dependencies
+/node_modules
+
+# Next.js output
+/.next
+/out
+
+# Tests and coverage
+/coverage
+
+# Local environment files (the example contract is tracked)
+.env*
+!.env.example
+
+# Logs and local tooling
+*.log
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+/migration-reports/
+/ED STAFF REQUEST 2026.xlsx
+/supabase/.temp/

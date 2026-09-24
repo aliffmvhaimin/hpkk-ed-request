@@ -1,0 +1,20 @@
+import { createClient } from "@supabase/supabase-js"; import { readFileSync } from "node:fs";
+for(const line of readFileSync(".env.local","utf8").split(/\r?\n/)){const [k,...v]=line.split("=");if(k&&v.length)process.env[k]??=v.join("=")}
+const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; if(!url||!key)throw new Error("Supabase environment missing");
+const email=u=>`${u}@hpkk-ed-request.local`, client=()=>createClient(url,key,{auth:{autoRefreshToken:false,persistSession:false}});
+const staffPassword=process.env.SMOKE_STAFF_CHANGED_PASSWORD,adminPassword=process.env.SMOKE_ADMIN_TEMP_PASSWORD;if(!staffPassword||!adminPassword)throw new Error("Smoke-test credentials missing");
+const staff=client(),admin=client();
+const staffLogin=await staff.auth.signInWithPassword({email:email("wc03.staff"),password:staffPassword}); if(staffLogin.error)throw staffLogin.error;
+const adminLogin=await admin.auth.signInWithPassword({email:email("wc03.admin"),password:adminPassword}); if(adminLogin.error)throw adminLogin.error;
+const week="2026-09-28", date="2026-09-28";
+const blank=await staff.rpc("save_weekly_requests",{p_week_start:week,p_remark:"   ",p_entries:[{date,codes:["PG"]}],p_expected_updated_at:null}); if(!blank.error)throw new Error("Blank remark accepted");
+const saved=await staff.rpc("save_weekly_requests",{p_week_start:week,p_remark:"WC05 runtime proof",p_entries:[{date,codes:["PG","MLM"]}],p_expected_updated_at:null}); if(saved.error)throw saved.error;
+const group=await staff.from("weekly_request_groups").select("id,updated_at").eq("week_start",week).single(); if(group.error)throw group.error;
+const entry=await staff.from("request_entries").select("id,request_entry_codes(code)").eq("request_date",date).single(); if(entry.error||entry.data.request_entry_codes.length!==2)throw entry.error??new Error("Multi-code request did not persist");
+const denied=await admin.from("weekly_request_groups").update({remark:"forbidden"}).eq("id",group.data.id).select(); if(!denied.error&&denied.data.length)throw new Error("Admin changed staff request");
+const changed=await staff.rpc("save_weekly_requests",{p_week_start:week,p_remark:"WC05 conflict baseline",p_entries:[{date,codes:["PTG"]}],p_expected_updated_at:group.data.updated_at}); if(changed.error)throw changed.error;
+const stale=await staff.rpc("save_weekly_requests",{p_week_start:week,p_remark:"stale",p_entries:[{date,codes:["K"]}],p_expected_updated_at:"2000-01-01T00:00:00Z"}); if(stale.error?.code!=="40001")throw new Error(`Stale result: ${JSON.stringify(stale.error)}`);
+const latest=await staff.from("weekly_request_groups").select("updated_at").eq("id",group.data.id).single();
+const removed=await staff.rpc("save_weekly_requests",{p_week_start:week,p_remark:"",p_entries:[],p_expected_updated_at:latest.data.updated_at}); if(removed.error)throw removed.error;
+const remaining=await staff.from("weekly_request_groups").select("id").eq("id",group.data.id); if(remaining.data?.length)throw new Error("Empty weekly group remained");
+console.log("Work Card 05 runtime smoke passed");

@@ -1,0 +1,1 @@
+﻿export default function DashboardLoading() { return <main className="state-page" aria-busy="true"><div className="state-card"><p className="eyebrow">Request calendar</p><h1>Loading the monthly view…</h1><p>Retrieving staff requests and weekly remarks.</p></div></main>; }

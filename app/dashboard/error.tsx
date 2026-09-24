@@ -1,0 +1,2 @@
+﻿"use client";
+export default function DashboardError({ reset }: { error: Error & { digest?: string }; reset: () => void }) { return <main className="state-page"><div className="state-card"><p className="eyebrow">Calendar unavailable</p><h1>We couldn’t load this month.</h1><p>Your session may have expired, or the calendar service may be unavailable.</p><button onClick={reset}>Try again</button><a href="/login">Return to sign in</a></div></main>; }
