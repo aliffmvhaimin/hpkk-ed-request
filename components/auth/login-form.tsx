@@ -10,15 +10,15 @@ export function LoginForm() {
     <form action={formAction} className="auth-form">
       <label>
         Username
-        <input name="username" autoComplete="username" required />
+        <input name="username" autoComplete="username" required aria-invalid={Boolean(state.message)} aria-describedby={state.message ? "login-error" : undefined} />
       </label>
 
       <label>
         Password
-        <input name="password" type="password" autoComplete="current-password" required />
+        <input name="password" type="password" autoComplete="current-password" required aria-invalid={Boolean(state.message)} aria-describedby={state.message ? "login-error" : undefined} />
       </label>
 
-      {state.message ? <p className="form-error">{state.message}</p> : null}
+      {state.message ? <p id="login-error" className="form-error" role="alert">{state.message}</p> : null}
 
       <button type="submit" disabled={pending}>
         {pending ? "Signing in..." : "Sign in"}

@@ -17,7 +17,7 @@ Build and run a repeatable, traceable migration for all 12 sheets in `ED STAFF R
 ## Instructions for the coding agent
 - Default to dry-run and require an explicit apply flag for writes.
 - Read JAN–DIS regardless of tab order.
-- Map confirmed staff profiles and 2026 calendar dates.
+- Derive the staff roster from every workbook staff row, generate unique usernames, and map 2026 calendar dates.
 - Map exact recognized codes; preserve combined, annotated, rich-text, or unknown values for review rather than guessing.
 - Map `CATATAN` to Monday-Sunday groups only when unambiguous.
 - Record source workbook, sheet, cell/range, raw value, status, reason, and target IDs.
@@ -26,7 +26,7 @@ Build and run a repeatable, traceable migration for all 12 sheets in `ED STAFF R
 
 ## What not to do
 - Do not edit the source workbook.
-- Do not drop data, invent accounts, infer ambiguity, overwrite live edits, or expose personal remarks publicly.
+- Create accounts only for names found in workbook staff rows. Do not drop data, infer ambiguous request codes, overwrite live edits, or expose personal remarks publicly.
 
 ## Done when
 - Every relevant source cell is resolved, intentionally ignored with reason, or listed for review.
@@ -51,4 +51,4 @@ If anything fails, reply `fix` and paste the error or describe what you see.
 Stop after reconciliation and idempotency proof pass.
 
 ## Status
-Implementation and dry-run reconciliation complete; awaiting confirmed staff profiles/aliases before apply and owner spot-check
+Complete - migration, reconciliation, idempotency proof, and owner spot-check passed

@@ -13,6 +13,7 @@ export type Profile = {
   display_name: string;
   role: AppRole;
   role_name: string;
+  workbook_order: number | null;
   must_change_password: boolean;
   is_active: boolean;
   can_edit_requests: boolean;

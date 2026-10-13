@@ -1,0 +1,5 @@
+import Link from "next/link";
+import { UsernameSettingsForm } from "@/components/auth/username-settings-form";
+import { requireActiveProfile } from "@/lib/auth/session";
+import { signOutAction } from "@/lib/auth/actions";
+export default async function SettingsPage(){const{profile}=await requireActiveProfile();return <main className="page-shell settings-shell"><header className="topbar"><div className="brand-mark">ED</div><div><p className="eyebrow">Account settings</p><h1>{profile.display_name}</h1></div><div className="topbar-links"><Link href="/dashboard">View calendar</Link>{profile.role==="admin"&&<Link href="/admin">Manage accounts</Link>}<form action={signOutAction}><button type="submit">Sign out</button></form></div></header><section className="settings-card" aria-labelledby="username-settings-title"><p className="eyebrow">Sign-in details</p><h2 id="username-settings-title">Change username</h2><p className="settings-copy">Choose a unique username for your HPKK ED Request account.</p><UsernameSettingsForm username={profile.username_display}/></section></main>}

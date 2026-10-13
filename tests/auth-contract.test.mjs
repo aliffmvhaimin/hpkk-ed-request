@@ -10,6 +10,8 @@ const loginPage = readFileSync("app/login/page.tsx", "utf8");
 const changePasswordPage = readFileSync("app/change-password/page.tsx", "utf8");
 const dashboardPage = readFileSync("app/dashboard/page.tsx", "utf8");
 const adminPage = readFileSync("app/admin/page.tsx", "utf8");
+const loginForm = readFileSync("components/auth/login-form.tsx", "utf8");
+const changePasswordForm = readFileSync("components/auth/change-password-form.tsx", "utf8");
 
 test("username login normalizes staff-entered names before lookup", () => {
   assert.match(username, /value\.trim\(\)\.toLowerCase\(\)/);
@@ -35,8 +37,23 @@ test("forced password change and disabled-account gates are server-side", () => 
   assert.match(adminPage, /requireAdminProfile/);
 });
 
+test("authenticated screens expose an explicit logout action", () => {
+  assert.match(changePasswordPage, /signOutAction/);
+  assert.match(changePasswordPage, />Logout</);
+  assert.match(dashboardPage, />Logout</);
+});
+
 test("auth screens are present without public registration or recovery", () => {
   assert.match(loginPage, /<LoginForm/);
   assert.match(changePasswordPage, /<ChangePasswordForm/);
   assert.doesNotMatch(loginPage, /register|sign up|recover|reset password/i);
+});
+
+test("login errors are announced and associated with both fields", () => {
+  assert.match(loginForm, /role="alert"/);
+  assert.match(loginForm, /aria-describedby=\{state\.message \? "login-error"/);
+});
+test("password-change errors are announced and associated with both fields", () => {
+  assert.match(changePasswordForm, /role="alert"/);
+  assert.match(changePasswordForm, /aria-describedby=\{state\.message \? "change-password-error"/);
 });

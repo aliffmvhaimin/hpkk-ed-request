@@ -33,6 +33,9 @@ export function parseWorkbook(buffer){
 }
 
 export const normalizeName=value=>String(value??"").normalize("NFKC").trim().replace(/\s+/g," ").toUpperCase();
+export const staffIdentityKey=value=>normalizeName(value).normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Z0-9]/g,"");
+export const usernameFromName=value=>normalizeName(value).normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,".").replace(/^\.+|\.+$/g,"").slice(0,64).replace(/\.+$/g,"");
+export const normalizeStaffRole=value=>{const role=normalizeName(value);if(role==="PEMBANTU PERAWATAN KLINIKAL")return "PEMBANTU PERAWATAN KESIHATAN";return new Set(["JURURAWAT TERLATIH","PENOLONG PEGAWAI PERUBATAN","PEMBANTU PERAWATAN KESIHATAN"]).has(role)?role:null};
 export const normalizeCode=value=>{const code=String(value??"").trim().toUpperCase();return REQUEST_CODES.has(code)?code:null};
 function serialDate(n){let d=Math.floor(n);if(d>59)d--;return new Date(Date.UTC(1899,11,31+d))}
 export function parseSourceDate(value,sheet,year=2026){
@@ -47,10 +50,31 @@ export function parseSourceDate(value,sheet,year=2026){
 const monday=iso=>{const d=new Date(`${iso}T00:00:00Z`),day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()-day+1);return d.toISOString().slice(0,10)};
 const nonempty=sheet=>[...sheet.cells.values()].filter(c=>c.value!==null&&String(c.value)!=="");
 
+export function buildStaffRoster(workbook,{profiles=[]}={}){
+ const people=new Map(),reserved=new Set(profiles.map(p=>String(p.username??"").toLowerCase()).filter(Boolean));
+ const sheetsByName=new Map(workbook.sheets.map(sheet=>[sheet.name,sheet]));
+ for(const sheetName of EXPECTED_SHEETS){
+  const sheet=sheetsByName.get(sheetName);if(!sheet)continue;
+  const headerRow=[...sheet.rows].find(([,r])=>[...r.values()].filter(c=>normalizeName(c.value)==="CATATAN").length>=4)?.[0];if(!headerRow)throw Error(`${sheet.name}: weekly header row not found`);
+  const remarks=[...(sheet.rows.get(headerRow)??new Map()).values()].filter(c=>normalizeName(c.value)==="CATATAN").map(c=>c.column);let roleName=null;
+  for(const [rn,row] of [...sheet.rows].sort((a,b)=>a[0]-b[0])){if(rn<=headerRow+1)continue;const cell=row.get(0),raw=cell?.raw.trim()??"";if(!raw)continue;
+   const heading=sheet.merges.some(m=>m.startRow===rn&&m.endRow===rn&&remarks.includes(m.endColumn));if(heading){roleName=normalizeStaffRole(raw);if(!roleName)throw Error(`${sheet.name}!${cell.ref}: unknown staff role heading ${raw}`);continue}if(!roleName)continue;
+   const key=staffIdentityKey(raw);if(!key)continue;const current=people.get(key);if(current){current.source_names.add(normalizeName(raw));current.source_refs.push(`${sheet.name}!${cell.ref}`);if(current.role_name!==roleName)throw Error(`${raw}: staff role changes between workbook sections`);continue}
+   people.set(key,{identity_key:key,display_name:normalizeName(raw),role_name:roleName,source_names:new Set([normalizeName(raw)]),source_refs:[`${sheet.name}!${cell.ref}`]});
+  }
+ }
+ const roster=[];for(const person of people.values()){
+  const existing=profiles.find(p=>staffIdentityKey(p.display_name)===person.identity_key);let username=existing?.username?String(existing.username).toLowerCase():usernameFromName(person.display_name);if(!username)username="staff";
+  if(!existing){const base=username;let suffix=2;while(reserved.has(username)){const tail=`.${suffix++}`;username=`${base.slice(0,64-tail.length).replace(/\.+$/g,"")}${tail}`}}
+  reserved.add(username);roster.push({...person,source_names:[...person.source_names],username,workbook_order:roster.length+1,existing_profile_id:existing?.id??null});
+ }
+ return roster;
+}
+
 function resolver(profiles,aliases){
- const names=new Map(),users=new Map();for(const p of profiles){const n=normalizeName(p.display_name);if(!names.has(n))names.set(n,[]);names.get(n).push(p);users.set(String(p.username).toLowerCase(),p)}
+ const names=new Map(),users=new Map();for(const p of profiles){const n=staffIdentityKey(p.display_name);if(!names.has(n))names.set(n,[]);names.get(n).push(p);users.set(String(p.username).toLowerCase(),p)}
  const map=new Map(Object.entries(aliases??{}).map(([n,u])=>[normalizeName(n),String(u).toLowerCase()]));
- return name=>{const key=normalizeName(name),list=map.has(key)?[users.get(map.get(key))].filter(Boolean):names.get(key)??[];if(list.length!==1)return{profile:null,reason:list.length>1?"staff name matches multiple profiles":"staff name has no confirmed profile"};const p=list[0];if(p.role!=="staff"||!p.is_active)return{profile:null,reason:p.role!=="staff"?"matched profile is not staff":"matched staff profile is disabled"};return{profile:p,reason:null}};
+ return name=>{const normalized=normalizeName(name),key=staffIdentityKey(name),list=map.has(normalized)?[users.get(map.get(normalized))].filter(Boolean):names.get(key)??[];if(list.length!==1)return{profile:null,reason:list.length>1?"staff name matches multiple profiles":"staff name has no confirmed profile"};const p=list[0];if(p.role!=="staff"||!p.is_active)return{profile:null,reason:p.role!=="staff"?"matched profile is not staff":"matched staff profile is disabled"};return{profile:p,reason:null}};
 }
 
 export function buildMigrationPlan(workbook,{profiles=[],aliases={},existingGroups=[],sourceWorkbook="ED STAFF REQUEST 2026.xlsx"}={}){
@@ -84,8 +108,8 @@ export function buildMigrationPlan(workbook,{profiles=[],aliases={},existingGrou
  return{source_workbook:sourceWorkbook,records,groups,summary:{sheets:12,source_cells:sourceCells,resolved:byStatus.resolved?.total??0,pending_review:byStatus.pending_review?.total??0,ignored:byStatus.ignored?.total??0,import_groups:groups.length,import_entries:groups.reduce((n,g)=>n+g.entries.length,0),by_sheet:summarize("sheet"),by_staff:(()=>{const out={};for(const r of records.filter(r=>r.staff)){out[r.staff]??={resolved:0,pending_review:0,ignored:0,total:0};out[r.staff][r.status]++;out[r.staff].total++}return out})()}};
 }
 
-export function toReviewMarkdown(plan,{sourceHash,generatedAt=new Date().toISOString(),mode="dry-run"}={}){
- const s=plan.summary,lines=["# Workbook migration reconciliation","",`- Source: \`${plan.source_workbook}\``,`- SHA-256: \`${sourceHash}\``,`- Generated: ${generatedAt}`,`- Mode: ${mode}`,`- Source cells: ${s.source_cells}`,`- Resolved: ${s.resolved}`,`- Pending review: ${s.pending_review}`,`- Intentionally ignored: ${s.ignored}`,`- Importable request entries: ${s.import_entries}`,"","## Sheet reconciliation","","| Sheet | Cells | Resolved | Review | Ignored |","| --- | ---: | ---: | ---: | ---: |"];for(const name of EXPECTED_SHEETS){const r=s.by_sheet[name];lines.push(`| ${name} | ${r.total} | ${r.resolved} | ${r.pending_review} | ${r.ignored} |`)}
+export function toReviewMarkdown(plan,{sourceHash,generatedAt=new Date().toISOString(),mode="dry-run",roster=[]}={}){
+ const s=plan.summary,lines=["# Workbook migration reconciliation","",`- Source: \`${plan.source_workbook}\``,`- SHA-256: \`${sourceHash}\``,`- Generated: ${generatedAt}`,`- Mode: ${mode}`,`- Source cells: ${s.source_cells}`,`- Resolved: ${s.resolved}`,`- Pending review: ${s.pending_review}`,`- Intentionally ignored: ${s.ignored}`,`- Importable request entries: ${s.import_entries}`,"","## Staff accounts","","| Display name | Username | Role | Account |","| --- | --- | --- | --- |"];for(const person of roster)lines.push(`| ${person.display_name.replaceAll("|","\\|")} | @${person.username} | ${person.role_name} | ${person.existing_profile_id?"Existing":"To create"} |`);lines.push("","## Sheet reconciliation","","| Sheet | Cells | Resolved | Review | Ignored |","| --- | ---: | ---: | ---: | ---: |");for(const name of EXPECTED_SHEETS){const r=s.by_sheet[name];lines.push(`| ${name} | ${r.total} | ${r.resolved} | ${r.pending_review} | ${r.ignored} |`)}
  lines.push("","## Staff reconciliation","","| Staff source value | Cells | Resolved | Review | Ignored |","| --- | ---: | ---: | ---: | ---: |");for(const [name,r] of Object.entries(s.by_staff).sort(([a],[b])=>a.localeCompare(b)))lines.push(`| ${name.replaceAll("|","\\|")} | ${r.total} | ${r.resolved} | ${r.pending_review} | ${r.ignored} |`);
  lines.push("","## Review queue","","| Sheet | Cell/range | Staff | Raw value | Reason |","| --- | --- | --- | --- | --- |");const safe=v=>String(v??"").replace(/[\r\n]+/g," ").replaceAll("|","\\|");for(const r of plan.records.filter(r=>r.status==="pending_review"))lines.push(`| ${safe(r.sheet)} | ${safe(r.ref)} | ${safe(r.staff)} | ${safe(r.raw)} | ${safe(r.reason)} |`);return lines.join("\n")+"\n";
 }

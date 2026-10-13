@@ -1,0 +1,4 @@
+"use client";
+import { useActionState } from "react";
+import { updateUsernameAction } from "@/lib/auth/settings-actions";
+export function UsernameSettingsForm({username}:{username:string}){const[state,formAction,pending]=useActionState(updateUsernameAction,{});return <form action={formAction} className="auth-form"><label>Username<input name="username" defaultValue={username} autoComplete="username" required minLength={3} maxLength={64} pattern="[a-zA-Z0-9._-]+"/></label><p className="settings-help">Your username is used to sign in. Changing it does not change your password.</p>{state.message?<p className={state.ok?"form-success":"form-error"} role="status">{state.message}</p>:null}<button type="submit" disabled={pending}>{pending?"Saving...":"Save username"}</button></form>}

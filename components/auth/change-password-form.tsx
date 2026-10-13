@@ -10,15 +10,15 @@ export function ChangePasswordForm() {
     <form action={formAction} className="auth-form">
       <label>
         New password
-        <input name="password" type="password" autoComplete="new-password" required minLength={8} />
+        <input name="password" type="password" autoComplete="new-password" required minLength={8} aria-invalid={Boolean(state.message)} aria-describedby={state.message ? "change-password-error" : undefined} />
       </label>
 
       <label>
         Confirm new password
-        <input name="confirmPassword" type="password" autoComplete="new-password" required minLength={8} />
+        <input name="confirmPassword" type="password" autoComplete="new-password" required minLength={8} aria-invalid={Boolean(state.message)} aria-describedby={state.message ? "change-password-error" : undefined} />
       </label>
 
-      {state.message ? <p className="form-error">{state.message}</p> : null}
+      {state.message ? <p id="change-password-error" className="form-error" role="alert">{state.message}</p> : null}
 
       <button type="submit" disabled={pending}>
         {pending ? "Saving..." : "Change password"}

@@ -1,4 +1,20 @@
-﻿import assert from "node:assert/strict"; import test from "node:test"; import { readFile } from "node:fs/promises";
+import assert from "node:assert/strict"; import test from "node:test"; import { readFile } from "node:fs/promises";
 const source=await readFile(new URL("../lib/calendar.ts",import.meta.url),"utf8");
 function range(month){const[y,n]=month.split("-").map(Number),iso=d=>d.toISOString().slice(0,10),add=(v,a)=>{const d=new Date(`${v}T00:00:00Z`);d.setUTCDate(d.getUTCDate()+a);return iso(d)},s=`${month}-01`,e=iso(new Date(Date.UTC(y,n,0)));return{monthStart:s,monthEnd:e,queryStart:add(s,1-(new Date(`${s}T00:00:00Z`).getUTCDay()||7)),queryEnd:add(e,7-(new Date(`${e}T00:00:00Z`).getUTCDay()||7))}}
 test("uses Kuala Lumpur timezone",()=>assert.match(source,/Asia\/Kuala_Lumpur/)); test("includes boundary weeks",()=>assert.deepEqual(range("2026-09"),{monthStart:"2026-09-01",monthEnd:"2026-09-30",queryStart:"2026-08-31",queryEnd:"2026-10-04"})); test("handles leap year",()=>assert.equal(range("2028-02").monthEnd,"2028-02-29")); test("handles year boundary",()=>assert.equal(range("2026-12").queryEnd,"2027-01-03"));
+
+const calendarData=await readFile(new URL("../lib/calendar-data.ts",import.meta.url),"utf8");
+test("calendar shows staff only and follows workbook role and row order",()=>{assert.match(calendarData,/eq\("role", "staff"\)/);assert.match(calendarData,/REQUEST_DISPLAY_ROLE_NAMES/);assert.match(calendarData,/workbook_order/);assert.match(calendarData,/workbookOrder\?\?Number\.MAX_SAFE_INTEGER/)});
+
+const weeklyGrid=await readFile(new URL("../components/calendar/weekly-grid.tsx",import.meta.url),"utf8");
+test("weekly table renders each role once as a section row",()=>{assert.match(weeklyGrid,/role-group-row/);assert.match(weeklyGrid,/colSpan=\{dates\.length\+2\}/);assert.match(weeklyGrid,/<th scope="row" className="staff-column">\{person\.displayName\}\{person\.id===viewerId/);assert.doesNotMatch(weeklyGrid,/\["Staff","Role"/)});
+
+const styles=await readFile(new URL("../app/globals.css",import.meta.url),"utf8");
+test("print view fits the reduced request roster on one A4 portrait page",()=>{assert.match(styles,/@page\{size:A4 portrait/);assert.match(styles,/height:3.5mm!important/);assert.doesNotMatch(styles,/zoom:\.78/);assert.match(styles,/page-break-inside:avoid/)});
+const staffRoles=await readFile(new URL("../lib/staff-roles.ts",import.meta.url),"utf8");
+test("request roster excludes Penolong Pegawai Perubatan",()=>{const displayRoles=staffRoles.match(/REQUEST_DISPLAY_ROLE_NAMES = \[([\s\S]*?)\]/)?.[1]??"";assert.match(displayRoles,/JURURAWAT TERLATIH/);assert.match(displayRoles,/PEMBANTU PERAWATAN KESIHATAN/);assert.doesNotMatch(displayRoles,/PENOLONG PEGAWAI PERUBATAN/)});const calendarViews=await readFile(new URL("../components/calendar/calendar-views.tsx",import.meta.url),"utf8");
+test("mobile defaults to a personal agenda with an explicit all-staff toggle",()=>{assert.match(calendarViews,/useState<"agenda"\|"grid">\(isAdmin\?"grid":"agenda"\)/);assert.match(calendarViews,/aria-pressed=\{mobileView==="agenda"\}/);assert.match(calendarViews,/>My agenda</);assert.match(calendarViews,/>All staff</);assert.match(calendarViews,/<WeekEditor/)});
+test("weekly grid exposes table headers and editable text semantics",()=>{assert.match(weeklyGrid,/<caption className="sr-only">/);assert.match(weeklyGrid,/scope="col"/);assert.match(weeklyGrid,/scope="row"/);assert.match(weeklyGrid,/role="textbox"/);assert.match(weeklyGrid,/aria-label="Weekly remark"/)});
+test("mobile request controls keep visible keyboard focus and 44px targets",()=>{assert.match(styles,/min-height:2\.75rem/);assert.match(styles,/input:focus-visible\+span/)});
+test("empty request and remark states use a plain hyphen",()=>{assert.match(weeklyGrid,/<span className="no-request">-<\/span>/);assert.match(weeklyGrid,/remarkMap\.get\(person\.id\)\?\?"-"/);assert.match(calendarViews,/request\?\.codes\.join\(", "\)\|\|"-"/)});
+test("screen-reader-only styles do not visually hide every button",()=>{assert.doesNotMatch(styles,/button,\s*\.sr-only/);assert.match(styles,/button,\s*input,\s*textarea,\s*select\s*\{\s*font: inherit/)});

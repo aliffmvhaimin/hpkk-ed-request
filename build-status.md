@@ -6,8 +6,8 @@
 - Build shape: Full-stack application
 - Shape confirmation: Confirmed
 - Current KDBM Lite stage: Build
-- Current phase: Work Card 07 - Workbook Migration awaiting confirmed staff profile mapping
-- Current work card: `work-cards/07-workbook-migration.md`
+- Current phase: Work Card 09 - GitHub and Vercel Proof
+- Current work card: `work-cards/09-github-vercel-proof.md`
 
 ## Completed work cards
 
@@ -18,6 +18,8 @@
 - Work Card 05 - Owner-Only Request Editing
 - Work Card 06 - Administrator Account Management
 
+- Work Card 07 - Workbook Migration and Reconciliation
+- Work Card 08 - Security, Accessibility, and Responsive Review
 ## Completed planning
 
 - [x] Setup Gate skipped by project owner because the referenced file was absent
@@ -29,11 +31,11 @@
 
 ## In progress
 
-- [ ] Work Card 07 - Workbook Migration awaiting confirmed staff profiles/aliases and apply
+- [ ] Work Card 09 - GitHub and Vercel Proof
 
 ## Blockers
 
-- The connected database contains only work-card dummy accounts. No workbook staff identity can be mapped or imported without the owner creating real staff profiles or confirming aliases.
+- None currently.
 
 ## Decisions made
 
@@ -92,11 +94,22 @@
 - Work Card 06 owner localhost account lifecycle check: accepted
 - Workbook migration parser, dry-run-first CLI, mapping configuration, JSON/Markdown reconciliation, source-cell audit trail, and atomic hash-idempotent database RPC implemented
 - All 12 workbook sheets reconcile regardless of tab order; 10,667 populated source cells classified with no silent loss
-- Current connected database has no confirmed workbook staff profiles, so the safe dry run resolves 0 importable entries and retains 9,678 cells for review; apply correctly remains blocked
+- Workbook migration applied with 80 derived staff accounts and 1,172 exact-code request entries; remaining cells are traceably classified for review or intentional ignore
 - Workbook import database migration deployed to the linked Supabase project
 - Quality checks: 30 tests passed; typecheck passed; lint passed
 - Production build: passed with Next.js 16.3.5 using webpack after Work Card 07 changes
+- Work Card 07 repeat apply returned `already_applied` for the same workbook SHA-256 and created zero duplicate accounts
+- Work Card 07 owner reconciliation and historical read-only spot-check accepted
+- Work Card 08 fixed the date-sensitive runtime proof, owner-scoped its persistence checks, and added Staff B plus past-date direct API attacks
+- Runtime auth proof passed; the hosted request lifecycle endpoint timed out after fixture setup, consistent with the previously documented hosted REST timeout
+- Linked pgTAP invocation reached the remote project but the current Supabase CLI requires Docker or Podman for its test runner; neither is installed. The previously verified 18-test remote RLS proof and current static policy checks remain green
+- Secret scan found no `.env.local` values in tracked files; local credential/reconciliation artifacts remain ignored
+- `npm audit --omit=dev` reported 0 vulnerabilities
+- Work Card 08 added the required mobile personal agenda/full-grid toggle, accessible table headers/caption, named textbox semantics, announced form errors, visible option focus, and 44px mobile targets
+- Work Card 08 follow-up replaced corrupted empty-state glyphs with `-` and added explicit Logout actions to the dashboard and forced password-change screen
+- Work Card 08 owner localhost review accepted after correcting the global CSS selector that visually clipped dashboard buttons
+- Quality checks: 50 tests passed; typecheck passed; lint passed; production build passed with Next.js 16.3.5 using webpack
 
 ## Next instruction for AI
 
-Owner: create or confirm the real staff profiles that correspond to workbook names, or provide the confirmed source-name-to-username aliases. Then rerun npm run import:workbook, review migration-reports/workbook-migration-reconciliation.md, and apply only when the mapping is correct. After apply, spot-check several months and confirm imported past entries are read-only. Do not begin Work Card 08 until this passes.
+Proceed with Work Card 09 GitHub and Vercel proof. Deployment is not yet performed.

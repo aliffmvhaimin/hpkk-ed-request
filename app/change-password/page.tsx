@@ -1,4 +1,5 @@
 import { ChangePasswordForm } from "@/components/auth/change-password-form";
+import { signOutAction } from "@/lib/auth/actions";
 import { requirePasswordChangeProfile } from "@/lib/auth/session";
 
 export default async function ChangePasswordPage() {
@@ -13,6 +14,9 @@ export default async function ChangePasswordPage() {
           Signed in as {profile.display_name}. Choose a new password before opening the request calendar.
         </p>
         <ChangePasswordForm />
+        <form action={signOutAction} className="auth-logout-form">
+          <button type="submit">Logout</button>
+        </form>
       </section>
     </main>
   );

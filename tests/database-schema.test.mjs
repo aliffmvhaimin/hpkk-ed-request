@@ -68,3 +68,14 @@ test("RLS policies prove shared reads and owner-only staff mutations", () => {
   assert.match(migration, /weekly_group_has_current_or_future_scope/);
   assert.match(migration, /\(week_start \+ 6\) >= public\.kl_today\(\)/);
 });
+
+const workbookOrderMigration = readFileSync(
+  "supabase/migrations/202609270001_staff_workbook_order.sql",
+  "utf8",
+);
+
+test("workbook staff order is stored and backfilled from imported rows", () => {
+  assert.match(workbookOrderMigration, /add column workbook_order integer/);
+  assert.match(workbookOrderMigration, /target_table = 'profiles'/);
+  assert.match(workbookOrderMigration, /source_positions\.source_row/);
+});

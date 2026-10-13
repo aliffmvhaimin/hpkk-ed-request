@@ -2,15 +2,20 @@ import { createClient } from "@supabase/supabase-js"; import { readFileSync } fr
 for(const line of readFileSync(".env.local","utf8").split(/\r?\n/)){const [k,...v]=line.split("=");if(k&&v.length)process.env[k]??=v.join("=")}
 const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; if(!url||!key)throw new Error("Supabase environment missing");
 const email=u=>`${u}@hpkk-ed-request.local`, client=()=>createClient(url,key,{auth:{autoRefreshToken:false,persistSession:false}});
-const staffPassword=process.env.SMOKE_STAFF_CHANGED_PASSWORD,adminPassword=process.env.SMOKE_ADMIN_TEMP_PASSWORD;if(!staffPassword||!adminPassword)throw new Error("Smoke-test credentials missing");
-const staff=client(),admin=client();
+const staffPassword=process.env.SMOKE_STAFF_CHANGED_PASSWORD,staffBPassword=process.env.SMOKE_STAFF_B_TEMP_PASSWORD,adminPassword=process.env.SMOKE_ADMIN_TEMP_PASSWORD;if(!staffPassword||!staffBPassword||!adminPassword)throw new Error("Smoke-test credentials missing");
+const staff=client(),staffB=client(),admin=client();
 const staffLogin=await staff.auth.signInWithPassword({email:email("wc03.staff"),password:staffPassword}); if(staffLogin.error)throw staffLogin.error;
+const staffBLogin=await staffB.auth.signInWithPassword({email:email("wc05.staffb"),password:staffBPassword}); if(staffBLogin.error)throw staffBLogin.error;
 const adminLogin=await admin.auth.signInWithPassword({email:email("wc03.admin"),password:adminPassword}); if(adminLogin.error)throw adminLogin.error;
-const week="2026-09-28", date="2026-09-28";
+const dateInKl=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kuala_Lumpur",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+const addDays=(value,days)=>new Date(Date.parse(`${value}T00:00:00Z`)+days*86400000).toISOString().slice(0,10);
+const weekday=new Date(`${dateInKl}T00:00:00Z`).getUTCDay(),week=addDays(dateInKl,(8-weekday)%7||7),date=week,pastWeek=addDays(week,-14);
+const past=await staff.rpc("save_weekly_requests",{p_week_start:pastWeek,p_remark:"past attack",p_entries:[{date:pastWeek,codes:["PG"]}],p_expected_updated_at:null}); if(!past.error)throw new Error("Past request mutation accepted");
 const blank=await staff.rpc("save_weekly_requests",{p_week_start:week,p_remark:"   ",p_entries:[{date,codes:["PG"]}],p_expected_updated_at:null}); if(!blank.error)throw new Error("Blank remark accepted");
 const saved=await staff.rpc("save_weekly_requests",{p_week_start:week,p_remark:"WC05 runtime proof",p_entries:[{date,codes:["PG","MLM"]}],p_expected_updated_at:null}); if(saved.error)throw saved.error;
-const group=await staff.from("weekly_request_groups").select("id,updated_at").eq("week_start",week).single(); if(group.error)throw group.error;
-const entry=await staff.from("request_entries").select("id,request_entry_codes(code)").eq("request_date",date).single(); if(entry.error||entry.data.request_entry_codes.length!==2)throw entry.error??new Error("Multi-code request did not persist");
+const group=await staff.from("weekly_request_groups").select("id,updated_at").eq("owner_id",staffLogin.data.user.id).eq("week_start",week).single(); if(group.error)throw group.error;
+const entry=await staff.from("request_entries").select("id,request_entry_codes(code)").eq("owner_id",staffLogin.data.user.id).eq("request_date",date).single(); if(entry.error||entry.data.request_entry_codes.length!==2)throw entry.error??new Error("Multi-code request did not persist");
+const staffBDenied=await staffB.from("weekly_request_groups").update({remark:"forbidden by staff B"}).eq("id",group.data.id).select(); if(!staffBDenied.error&&staffBDenied.data.length)throw new Error("Staff B changed Staff A request");
 const denied=await admin.from("weekly_request_groups").update({remark:"forbidden"}).eq("id",group.data.id).select(); if(!denied.error&&denied.data.length)throw new Error("Admin changed staff request");
 const changed=await staff.rpc("save_weekly_requests",{p_week_start:week,p_remark:"WC05 conflict baseline",p_entries:[{date,codes:["PTG"]}],p_expected_updated_at:group.data.updated_at}); if(changed.error)throw changed.error;
 const stale=await staff.rpc("save_weekly_requests",{p_week_start:week,p_remark:"stale",p_entries:[{date,codes:["K"]}],p_expected_updated_at:"2000-01-01T00:00:00Z"}); if(stale.error?.code!=="40001")throw new Error(`Stale result: ${JSON.stringify(stale.error)}`);
