@@ -10,6 +10,12 @@ test("the application shell presents the confirmed project identity", async () =
   assert.match(project, /HPKK ED Request/);
 });
 
+test("the root route uses login as the landing page", async () => {
+  const home = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+
+  assert.match(home, /redirect\("\/login"\)/);
+});
+
 test("the environment contract contains placeholders rather than values", async () => {
   const envExample = await readFile(new URL("../.env.example", import.meta.url), "utf8");
   const assignments = envExample
