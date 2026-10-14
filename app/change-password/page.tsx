@@ -15,7 +15,7 @@ export default async function ChangePasswordPage() {
         </p>
         <ChangePasswordForm />
         <form action={signOutAction} className="auth-logout-form">
-          <button type="submit">Logout</button>
+          <button type="submit">Sign out</button>
         </form>
       </section>
     </main>

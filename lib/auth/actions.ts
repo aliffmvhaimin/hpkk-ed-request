@@ -5,6 +5,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DISABLED_ACCOUNT_ERROR, GENERIC_AUTH_ERROR, PASSWORD_CHANGE_ERROR, type AuthActionState } from "@/lib/auth/errors";
 import { normalizeUsername } from "@/lib/auth/username";
+import { getSessionProfile } from "@/lib/auth/session";
 
 export async function loginAction(_state: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const username = normalizeUsername(String(formData.get("username") ?? ""));
@@ -66,14 +67,13 @@ export async function changePasswordAction(_state: AuthActionState, formData: Fo
     return { message: PASSWORD_CHANGE_ERROR };
   }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  const session = await getSessionProfile();
+  if (!session) {
     redirect("/login");
   }
+
+  const { user } = session;
+  const supabase = await createSupabaseServerClient();
 
   const { error: passwordError } = await supabase.auth.updateUser({ password });
 

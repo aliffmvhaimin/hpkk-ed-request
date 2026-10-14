@@ -10,7 +10,7 @@ export function LoginForm() {
     <form action={formAction} className="auth-form">
       <label>
         Username
-        <input name="username" autoComplete="username" required aria-invalid={Boolean(state.message)} aria-describedby={state.message ? "login-error" : undefined} />
+        <input name="username" autoComplete="username" autoCapitalize="none" spellCheck={false} required aria-invalid={Boolean(state.message)} aria-describedby={state.message ? "login-error" : undefined} />
       </label>
 
       <label>

@@ -39,8 +39,8 @@ test("forced password change and disabled-account gates are server-side", () => 
 
 test("authenticated screens expose an explicit logout action", () => {
   assert.match(changePasswordPage, /signOutAction/);
-  assert.match(changePasswordPage, />Logout</);
-  assert.match(dashboardPage, />Logout</);
+  assert.match(changePasswordPage, />Sign out</);
+  assert.match(dashboardPage, />Sign out</);
 });
 
 test("auth screens are present without public registration or recovery", () => {
