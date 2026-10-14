@@ -13,8 +13,8 @@ export function CalendarViews({month,viewerId,canEdit,isAdmin,today,staff,groups
  const week=weeks[index],weekEntries=entries.filter(e=>week.dates.includes(e.date)),weekGroups=groups.filter(g=>g.weekStart===week.start),viewerEntries=weekEntries.filter(e=>e.ownerId===viewerId),viewerGroup=weekGroups.find(g=>g.ownerId===viewerId);
  return <>
   <div className="calendar-view-heading">
-   <div><p className="eyebrow">Request roster</p><h2>Monthly request grid</h2><p>{isAdmin?"Edit a date heading to add a public holiday or HKA remark.":canEdit?"Your row is editable; all other rows are read only.":"Your request editing access is locked."}</p></div>
-   <span className="read-only-badge">{isAdmin?"Admin date remarks":canEdit?"Your row editable":"Editing locked"}</span>
+   <div><p className="eyebrow">Shift request roster</p><h2>Weekly Staff Requests</h2><p>{isAdmin?"Review requests and edit date remarks for the department.":canEdit?"Select a request code in your row; all other rows are read only.":"Your request editing access is locked."}</p></div>
+   <div className="roster-summary"><span><strong>{staff.length}</strong> active staff</span><span className="read-only-badge">{isAdmin?"Admin view":canEdit?"Your row editable":"Editing locked"}</span></div>
   </div>
   <nav className="week-controls" aria-label="Calendar week">
    <button onClick={()=>setIndex(i=>Math.max(0,i-1))} disabled={index===0} aria-label="Previous week">←</button>
