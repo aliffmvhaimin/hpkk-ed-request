@@ -1,5 +1,7 @@
 # Scripts
 
+Date-access and past-date request checks run through `supabase db query --linked --file supabase/tests/request-date-access.sql`. These checks roll back all fixtures and closures. The request-editing smoke script uses an explicit weekly edit scope; request dates must be open for those fixture accounts.
+
 Run npm run import:workbook for a dry run across all 12 month sheets. The command writes JSON and Markdown reconciliation reports under migration-reports/ and never edits the source workbook.
 
 The importer builds a canonical roster from every staff name in the workbook. It proposes a unique lowercase dotted username for each person, preserves the three workbook roles: `JURURAWAT TERLATIH`, `PENOLONG PEGAWAI PERUBATAN`, and `PEMBANTU PERAWATAN KESIHATAN` (including the March `PEMBANTU PERAWATAN KLINIKAL` label as the same group). Dry-run reports show the proposed account roster. On `--apply`, missing staff accounts are created with one-time random passwords in the gitignored `migration-reports/workbook-created-accounts.json` file, and users must change those passwords at first sign-in.
