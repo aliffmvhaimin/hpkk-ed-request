@@ -17,5 +17,15 @@ export async function createStaffAccount(input:CreateStaffAccountInput){
 }
 export async function setAccountActive(userId:string,isActive:boolean){const{profile}=await requireAdminProfile();if(profile.id===userId&&!isActive)throw new Error("You cannot disable your own account");const supabase=createSupabaseAdminClient();const{error}=await supabase.from("profiles").update({is_active:isActive}).eq("id",userId);if(error)throw new Error("Account status could not be updated")}
 export async function setRequestEditing(userId:string,canEdit:boolean){await requireAdminProfile();const supabase=createSupabaseAdminClient();const{error}=await supabase.from("profiles").update({can_edit_requests:canEdit}).eq("id",userId).eq("role","staff");if(error)throw new Error("Edit access could not be changed")}
+export async function setAllStaffRequestEditing(canEdit:boolean){
+ await requireAdminProfile();
+ if(typeof canEdit!=="boolean")throw new Error("Select a valid edit access setting");
+ const supabase=createSupabaseAdminClient();
+ // One database statement: every staff account changes together, including hidden or disabled accounts.
+ const{error,count}=await supabase.from("profiles").update({can_edit_requests:canEdit},{count:"exact"}).eq("role","staff");
+ if(error)throw new Error("Staff edit access could not be changed. Please try again.");
+ if(count===null)throw new Error("Could not confirm the staff update. Refresh the directory to check edit access.");
+ return count;
+}
 export async function updateRoleName(userId:string,roleName:string){await requireAdminProfile();const value=roleName.trim();if(!isStaffRoleName(value))throw new Error("Select a valid staff role");const supabase=createSupabaseAdminClient(),profile=await supabase.from("profiles").select("role").eq("id",userId).maybeSingle<{role:"staff"|"admin"}>();if(profile.error||profile.data?.role!=="staff")throw new Error("Only staff role names can be changed");const{error}=await supabase.from("profiles").update({role_name:value}).eq("id",userId).eq("role","staff");if(error)throw new Error("Role name could not be updated")}
 export async function resetAccountPassword(userId:string,temporaryPassword:string){await requireAdminProfile();if(temporaryPassword.length<12)throw new Error("Temporary password is too short");const supabase=createSupabaseAdminClient();const{error:authError}=await supabase.auth.admin.updateUserById(userId,{password:temporaryPassword});if(authError)throw new Error("Password could not be reset");const{error:profileError}=await supabase.from("profiles").update({must_change_password:true}).eq("id",userId);if(profileError)throw new Error("Password was reset, but profile status could not be updated")}

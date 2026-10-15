@@ -388,29 +388,6 @@ html,body{max-width:100%;overflow-x:hidden}.cell-options{position:static;width:1
 /* Admin controls, inline remarks, and weekly exports */
 .inline-role-form{display:flex;gap:.35rem}.inline-role-form input{min-width:9rem;padding:.4rem;border:1px solid var(--border);border-radius:.4rem}.inline-role-form button,.lock-button,.week-export-actions button{padding:.45rem .65rem;border:1px solid var(--border);border-radius:.4rem;background:white;color:var(--text);font-size:.72rem;font-weight:800;cursor:pointer}.lock-button{color:#9b2418;background:#fff1ef}.lock-button.unlocked{color:#075e58;background:#e6f7f3}.week-export-actions{display:flex;justify-content:flex-end;gap:.5rem;padding:.75rem 1rem;border-bottom:1px solid var(--border)}.week-export-actions button{color:white;border-color:var(--teal-700);background:var(--teal-700)}
 .editable-remark{min-height:4rem;padding:.55rem;border-radius:.45rem;background:#f5f8f7;text-align:left;line-height:1.45;cursor:text}.editable-remark:focus{background:white;box-shadow:inset 0 0 0 2px var(--teal-700);outline:0}.editable-remark:empty::before,.date-remark [contenteditable=true]:empty::before{content:attr(data-placeholder);color:#8b9a9e}.date-remark{min-height:1.3rem;margin-top:.25rem;color:#8b4d12;font-size:.58rem;font-weight:700;line-height:1.2;text-transform:none}.date-remark.editable [contenteditable=true]{min-height:1.25rem;padding:.18rem;border-radius:.25rem;background:#fff8e8;cursor:text}.date-remark small{display:block;color:var(--teal-700);font-size:.52rem}.weekly-table thead th{height:auto;min-height:4.4rem}
-@media print{
- @page{size:A4 portrait;margin:5mm}
- html,body{margin:0;background:white}
- .page-shell{width:100%;padding:0}
- .topbar,.month-controls,.calendar-view-heading,.week-controls,.code-legend,.week-export-actions{display:none!important}
- .calendar-content,.week-grid-scroll{display:block;margin:0;overflow:visible}
- .week-grid-card{width:100%;break-inside:avoid-page;page-break-inside:avoid;border:0;box-shadow:none}
- .weekly-table{width:100%;min-width:0;table-layout:fixed;border-collapse:collapse;font-size:5pt;line-height:1.05}
- .weekly-table th,.weekly-table td,.week-grid-card .weekly-table td,.week-grid-card .weekly-table .staff-column{box-sizing:border-box;width:auto!important;min-width:0!important;height:3.5mm!important;max-height:3.5mm;padding:0 .45mm;overflow:hidden;white-space:nowrap;text-overflow:clip}
- .weekly-table thead th{position:static;height:7mm!important;min-height:0;font-size:5pt}
- .weekly-table thead th>span{font-size:4.6pt}
- .weekly-table .staff-column{position:static;width:38mm!important;font-size:4.8pt}
- .weekly-table .remark-column{width:42mm!important;text-align:left}
- .weekly-table thead .remark-column{text-align:center}
- .weekly-table .role-group-row th{height:3.8mm!important;padding:0 .8mm;font-size:4.8pt}
- .date-remark{min-height:0;margin:0;font-size:4.2pt;line-height:1}
- .code-chip{padding:0;border:0;background:transparent;color:#000;font-size:5pt;box-shadow:none}
- .code-list{gap:.4mm}
- .cell-editor summary{min-height:0;padding:0;border:0}
- .cell-add,.cell-options,.row-remark-editor>div:not(.editable-remark),.weekly-table small{display:none!important}
- .editable-remark,.row-remark-text{min-height:0;margin:0;padding:0;overflow:hidden;white-space:nowrap;background:transparent;font-size:5pt;line-height:1.05}
- .outside-month{opacity:1}
-}
 
 .settings-shell{width:min(54rem,calc(100% - 2rem))}.settings-card{width:min(36rem,100%);margin:3rem auto 0;padding:1.5rem;border:1px solid var(--border);border-radius:1rem;background:var(--surface);box-shadow:var(--shadow)}.settings-card h2{margin:.2rem 0 .75rem;font-size:2rem}.settings-card>.eyebrow{color:var(--teal-700)}.settings-copy,.settings-help{color:var(--text-muted);line-height:1.5}.settings-help{margin:-.35rem 0 0;font-size:.8rem}.form-success{margin:0;border-left:4px solid var(--teal-700);padding:.75rem .9rem;color:#075e58;background:#e6f7f3;font-size:.9rem;line-height:1.4}.inline-role-form select{min-width:15rem;padding:.4rem;border:1px solid var(--border);border-radius:.4rem;background:white}
 
@@ -755,7 +732,6 @@ body{background:#f1f5f9;color:#1e293b}.calendar-shell{width:100%;padding:0;min-h
  .role-count { margin-left:6px;padding:2px 6px;border-radius:20px;background:#e2e8f0;font-size:9px; }
  .week-export-actions { display:flex;align-items:center;flex-wrap:wrap; }
 }
-@media print { .roster-filters { display:none!important; } .role-collapse { background:none;border:0;color:inherit;font:inherit; } }
 @media screen {
  .roster-grid-toolbar { display:flex;align-items:center;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid #e2e8f0; }
  .week-grid-card .weekly-table td,.week-grid-card .weekly-table .staff-column { height:48px; }
@@ -763,11 +739,12 @@ body{background:#f1f5f9;color:#1e293b}.calendar-shell{width:100%;padding:0;min-h
  .week-grid-scroll { max-height:calc(100vh - 245px); }
  .admin-create-form input,.admin-create-form select { min-height:34px; }
 }
-@media print { .roster-control-bar,.roster-grid-toolbar { display:none!important; } }
 @media screen {
  .settings-card .username-input input { padding-left:28px;font-family:ui-monospace,monospace; }
+ .admin-notice.pending { border-left:4px solid #2563eb;color:#1e40af;background:#eff6ff; }
  .admin-list-card .directory-empty { text-align:center; }
- .week-export-actions button:hover { background:#115e59; }
+ .week-export-actions button:hover,
+ .week-export-actions button:focus-visible { background:#115e59;color:#fff; }
  .admin-table tbody tr:hover td { background:#f8fafc; }
  .settings-card .auth-form .password-visibility:hover { color:#115e59;text-decoration:underline;box-shadow:none;transform:none; }
 }
@@ -803,4 +780,44 @@ body{background:#f1f5f9;color:#1e293b}.calendar-shell{width:100%;padding:0;min-h
  .row-remark-editor button { min-height:44px; }
  .personal-agenda { margin:12px;padding:12px; }
  .mobile-view-toggle { margin:12px 12px 0; }
+}
+
+/* Keep print overrides after screen defaults so the entire roster can paginate. */
+@media print {
+ @page{size:A4 portrait;margin:5mm}
+ html,body { min-width:0;margin:0;background:white; }
+ .page-shell { width:100%;min-height:0;margin:0;padding:0; }
+ .topbar,.roster-control-bar,.month-controls,.calendar-view-heading,.week-controls,
+ .code-legend,.week-export-actions,.roster-grid-toolbar,.roster-filters,
+ .mobile-view-toggle,.personal-agenda { display:none!important; }
+ .calendar-content,.calendar-grid-panel,.week-grid-card,.week-grid-scroll {
+  display:block;width:100%;max-width:none;height:auto;max-height:none;
+  margin:0;padding:0;overflow:visible;border:0;border-radius:0;box-shadow:none;
+ }
+ .week-grid-card { break-inside:auto;page-break-inside:auto; }
+ .weekly-table { width:100%;min-width:0;table-layout:fixed;border-collapse:collapse;font-size:6pt;line-height:1.2; }
+ .weekly-table thead { display:table-header-group; }
+ .weekly-table tr { break-inside:avoid;page-break-inside:avoid; }
+ .weekly-table th,.weekly-table td,
+ .week-grid-card .weekly-table td,.week-grid-card .weekly-table .staff-column {
+  position:static;box-sizing:border-box;width:auto;min-width:0;height:3.5mm;
+  max-height:none;padding:.3mm .45mm;overflow:visible;white-space:normal;
+  overflow-wrap:anywhere;text-overflow:clip;box-shadow:none;font-size:6pt;
+ }
+ .weekly-table thead th { height:auto;min-height:0;padding:1mm .45mm;font-size:6pt; }
+ .weekly-table thead th>span { font-size:5.5pt; }
+ .week-grid-card .weekly-table .staff-column { width:38mm; }
+ .weekly-table .remark-column { width:42mm;text-align:left; }
+ .weekly-table thead .remark-column { text-align:center; }
+ .weekly-table .role-group-row th { height:auto;padding:.6mm .8mm;font-size:6pt; }
+ .role-collapse { padding:0;background:none;border:0;color:inherit;font:inherit;text-align:left; }
+ .date-remark { min-height:0;margin:0;font-size:5.5pt;line-height:1.2; }
+ .date-remark.editable [contenteditable=true] { min-height:0;padding:0;background:transparent; }
+ .code-chip { min-width:0;padding:0;border:0;background:transparent;color:#000;font-size:6pt;box-shadow:none; }
+ .code-list { gap:.4mm; }
+ .cell-editor summary { display:block;min-height:0;padding:0;border:0; }
+ .cell-add,.cell-options,.row-remark-editor>div:not(.editable-remark),.weekly-table small { display:none!important; }
+ .editable-remark,.row-remark-text { min-height:0;margin:0;padding:0;overflow:visible;white-space:normal;overflow-wrap:anywhere;background:transparent;font-size:6pt;line-height:1.2; }
+ .editable-remark:empty::before,.date-remark [contenteditable=true]:empty::before { content:none; }
+ .outside-month { opacity:1; }
 }
