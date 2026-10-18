@@ -8,6 +8,7 @@ export const REQUEST_CODES = [
   { code: "K", meaningMs: "kursus", displayOrder: 70 },
   { code: "HKA", meaningMs: "hari kelepasan am", displayOrder: 80 },
   { code: "HKO", meaningMs: "hari kelepasan owing", displayOrder: 90 },
+  { code: "CTR", meaningMs: "cuti tanpa rekod", displayOrder: 100 },
 ] as const;
 
 export type RequestCode = (typeof REQUEST_CODES)[number]["code"];

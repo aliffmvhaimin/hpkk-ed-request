@@ -853,3 +853,8 @@ body{background:#f1f5f9;color:#1e293b}.calendar-shell{width:100%;padding:0;min-h
  .editable-remark:empty::before,.date-remark [contenteditable=true]:empty::before { content:none; }
  .outside-month { opacity:1; }
 }
+/* Requested leave and holiday codes */
+.code-km,.code-hk,.code-ct,.code-hka,.code-hko,.code-ctr{border-color:#fca5a5!important;color:#b91c1c!important;background:#fee2e2!important}
+.code-k{border-color:#93c5fd!important;color:#1d4ed8!important;background:#dbeafe!important}
+.code-options input:checked+.code-km,.code-options input:checked+.code-hk,.code-options input:checked+.code-ct,.code-options input:checked+.code-hka,.code-options input:checked+.code-hko,.code-options input:checked+.code-ctr{border-color:#dc2626!important;color:#fff!important;background:#dc2626!important}
+.code-options input:checked+.code-k{border-color:#2563eb!important;color:#fff!important;background:#2563eb!important}
