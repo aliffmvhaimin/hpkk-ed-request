@@ -1,4 +1,4 @@
-import {createHash,randomBytes} from "node:crypto";
+import {createHash} from "node:crypto";
 import {mkdir,readFile,writeFile} from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -7,7 +7,7 @@ import {buildMigrationPlan,buildStaffRoster,parseWorkbook,toReviewMarkdown} from
 
 function args(values){const o={workbook:"ED STAFF REQUEST 2026.xlsx",mapping:"scripts/workbook-import-map.json",reportDir:"migration-reports",apply:false};for(let i=0;i<values.length;i++){if(values[i]==="--apply")o.apply=true;else if(values[i]==="--workbook")o.workbook=values[++i];else if(values[i]==="--mapping")o.mapping=values[++i];else if(values[i]==="--report-dir")o.reportDir=values[++i];else throw Error(`Unknown argument: ${values[i]}`)}return o}
 async function env(){for(const line of(await readFile(".env.local","utf8")).split(/\r?\n/)){const i=line.indexOf("=");if(i>0&&!line.trimStart().startsWith("#"))process.env[line.slice(0,i)]??=line.slice(i+1)}if(!process.env.NEXT_PUBLIC_SUPABASE_URL||!process.env.SUPABASE_SERVICE_ROLE_KEY)throw Error("Supabase server environment is incomplete")}
-const temporaryPassword=()=>`${randomBytes(18).toString("base64url")}Aa1!`;
+const temporaryPassword=()=>"abcd1234";
 const authEmail=username=>`${username}@hpkk-ed-request.local`;
 
 async function loadProfiles(db){const q=await db.from("profiles").select("id,username,display_name,role,role_name,workbook_order,is_active");if(q.error)throw q.error;return q.data}
