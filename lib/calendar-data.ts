@@ -3,6 +3,7 @@ import { getMonthRange } from "@/lib/calendar";
 import type { RequestCode } from "@/lib/request-codes";
 import { REQUEST_DISPLAY_ROLE_NAMES } from "@/lib/staff-roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { readAllRows } from "@/lib/supabase/pagination";
 export type CalendarStaff = { id: string; displayName: string; roleName: string; workbookOrder: number | null };
 export type CalendarGroup = { id: string; ownerId: string; weekStart: string; remark: string; updatedAt: string };
 export type CalendarRequest = { id: string; ownerId: string; groupId: string; date: string; codes: RequestCode[] };
@@ -12,7 +13,7 @@ export async function getCalendarData(month: string) {
   const [profiles, groups, entries, dateRemarks, dateLocks] = await Promise.all([
     supabase.from("profiles").select("id, display_name, role_name, workbook_order").eq("is_active", true).eq("role", "staff").in("role_name", [...REQUEST_DISPLAY_ROLE_NAMES]),
     supabase.from("weekly_request_groups").select("id, owner_id, week_start, remark, updated_at").gte("week_start", queryStart).lte("week_start", queryEnd).order("week_start"),
-    supabase.from("request_entries").select("id, owner_id, group_id, request_date, request_entry_codes(code)").gte("request_date", queryStart).lte("request_date", queryEnd).order("request_date"),
+    readAllRows((from,to)=>supabase.from("request_entries").select("id, owner_id, group_id, request_date, request_entry_codes(code)", { count: "exact" }).gte("request_date", queryStart).lte("request_date", queryEnd).order("request_date").order("id").range(from,to)),
     supabase.from("calendar_date_remarks").select("remark_date, remark, updated_at").gte("remark_date", queryStart).lte("remark_date", queryEnd).order("remark_date"),
     supabase.from("request_date_locks").select("request_date").gte("request_date", queryStart).lte("request_date", queryEnd).order("request_date"),
   ]);

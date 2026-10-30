@@ -9,6 +9,17 @@
 - Current phase: Work Card 09 - GitHub and Vercel Proof
 - Current work card: `work-cards/09-github-vercel-proof.md`
 
+## Latest production deployment — 30 October 2026
+
+- Production: https://hpkk-ed-request.vercel.app
+- Deployment: `dpl_6C7jNtx23dUKR11Ujpsp2bZH7caz` — Vercel reported `READY`, production alias assigned.
+- Published directly from the verified local workspace; GitHub was not pushed in this deployment.
+- Fixes: remark caret reset, refreshed editor state and conflict snapshots, unsaved week navigation, request validation and connection feedback, monthly request pagination, and XLSX remark-column layout.
+- Verification before deployment: lint, typecheck, 81 tests, and production webpack build passed. Vercel's production Turbopack build also passed.
+- Live checks: login page and its JavaScript return HTTP 200; root, admin, settings, and password-change pages redirect unauthenticated visitors to login. Dashboard streams a login redirect without rendering the roster.
+- Added `.vercelignore`; deployment dry run confirmed credentials, the source workbook, migration reports, output, and temporary files were excluded.
+- No database migration was needed. Existing saved remark text was not modified. Authenticated editing and account lifecycle smoke checks were not rerun in production.
+
 ## Completed work cards
 
 - Work Card 01 - Project Skeleton
@@ -112,4 +123,4 @@
 
 ## Next instruction for AI
 
-Proceed with Work Card 09 GitHub and Vercel proof. Deployment is not yet performed.
+Production is deployed. Remaining Work Card 09 proof is authenticated desktop/mobile editing and account lifecycle verification with disposable accounts, plus source-control synchronization when authorized.

@@ -8,7 +8,7 @@ import { formatDay } from "@/lib/calendar";
 
 export async function setRequestDateAccessAction(input: { start: string; end: string; locked: boolean }) {
   await requireAdminProfile();
-  if (typeof input.locked !== "boolean" || !isValidRequestRange(input.start, input.end)) {
+  if (!input || typeof input.locked !== "boolean" || !isValidRequestRange(input.start, input.end)) {
     return { ok: false, message: "Select a valid date range of up to 366 days." };
   }
   try {

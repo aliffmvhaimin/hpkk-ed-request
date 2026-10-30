@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import test from "node:test";
 import { createElement } from "react";
@@ -19,7 +19,7 @@ function load(relativePath) {
   const imports = (name) => {
     if (name === "next/navigation") return { useRouter: () => ({ refresh() {} }) };
     if (name === "@/lib/requests/actions" || name === "@/lib/requests/date-remark-actions") return {};
-    if (name.startsWith("@/")) return load(`${name.slice(2)}.ts`);
+    if (name.startsWith("@/")) return load(`${name.slice(2)}.${existsSync(new URL(`../${name.slice(2)}.tsx`,import.meta.url))?"tsx":"ts"}`);
     return require(name);
   };
   new Function("require", "exports", outputText)(imports, exports);

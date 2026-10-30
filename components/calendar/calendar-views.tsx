@@ -12,6 +12,7 @@ export function CalendarViews({month,viewerId,canEdit,isAdmin,today,staff,groups
  const weeks=useMemo(()=>getCalendarWeeks(month),[month]);
  const defaultIndex=Math.max(0,weeks.findIndex(w=>today>=w.start&&today<=w.end));
  const[index,setIndex]=useState(defaultIndex),[mobileView,setMobileView]=useState<"agenda"|"grid">(isAdmin?"grid":"agenda");
+ function changeWeek(next:number){if(window.dispatchEvent(new Event("request-week-change",{cancelable:true})))setIndex(next)}
  const week=weeks[index],weekEntries=entries.filter(e=>week.dates.includes(e.date)),weekGroups=groups.filter(g=>g.weekStart===week.start),viewerEntries=weekEntries.filter(e=>e.ownerId===viewerId),viewerGroup=weekGroups.find(g=>g.ownerId===viewerId);
  return <>
   <div className="roster-control-bar"><div className="calendar-view-heading">
@@ -19,9 +20,9 @@ export function CalendarViews({month,viewerId,canEdit,isAdmin,today,staff,groups
    <div className="roster-summary"><span><strong>{staff.length}</strong> active staff</span><span className="read-only-badge">{isAdmin?"Admin view":canEdit?"Your row editable":"Editing locked"}</span></div>
   </div>
   <MonthControls month={month}/><nav className="week-controls" aria-label="Calendar week">
-   <button onClick={()=>setIndex(i=>Math.max(0,i-1))} disabled={index===0} aria-label="Previous week">←</button>
+   <button onClick={()=>changeWeek(Math.max(0,index-1))} disabled={index===0} aria-label="Previous week">←</button>
    <div><p className="eyebrow">Week {index+1} of {weeks.length}</p><h3>{formatDay(week.start,{day:"numeric",month:"short"})} – {formatDay(week.end,{day:"numeric",month:"short",year:"numeric"})}</h3></div>
-   <button onClick={()=>setIndex(i=>Math.min(weeks.length-1,i+1))} disabled={index===weeks.length-1} aria-label="Next week">→</button>
+   <button onClick={()=>changeWeek(Math.min(weeks.length-1,index+1))} disabled={index===weeks.length-1} aria-label="Next week">→</button>
   </nav></div>
   <RequestDateAccess key={week.start} dates={week.dates} lockedDates={lockedDates} isAdmin={isAdmin}/>
   {!isAdmin&&<div className="mobile-view-toggle" aria-label="Calendar view">

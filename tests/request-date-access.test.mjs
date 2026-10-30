@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import test from "node:test";
 import { createElement } from "react";
@@ -16,7 +16,7 @@ function load(file, mocks = {}) {
     if (name in mocks) return mocks[name];
     if (name === "next/navigation") return { useRouter: () => ({ refresh() {} }) };
     if (name.startsWith("@/lib/requests/")) return {};
-    if (name.startsWith("@/")) return load(`${name.slice(2)}.ts`, mocks);
+    if (name.startsWith("@/")) return load(`${name.slice(2)}.${existsSync(new URL(`../${name.slice(2)}.tsx`,import.meta.url))?"tsx":"ts"}`, mocks);
     return require(name);
   }, exports);
   return exports;
