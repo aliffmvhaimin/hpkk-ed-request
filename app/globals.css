@@ -853,6 +853,32 @@ body{background:#f1f5f9;color:#1e293b}.calendar-shell{width:100%;padding:0;min-h
  .editable-remark:empty::before,.date-remark [contenteditable=true]:empty::before { content:none; }
  .outside-month { opacity:1; }
 }
+.announcements { margin:20px 24px;padding:20px;border:1px solid #bfdbfe;border-radius:12px;background:#f8fbff; }
+.announcements-heading,.announcement-card-heading { display:flex;align-items:center;justify-content:space-between;gap:12px; }
+.announcements-heading h2 { margin:0;font-size:17px;color:#0f172a; }
+.announcements-heading>span { font-size:12px;color:#64748b; }
+.announcement-list { display:grid;gap:12px;margin-top:12px; }
+.announcement-card { padding:16px;background:white;border:1px solid #dbeafe;border-left:4px solid #2563eb;border-radius:8px;min-width:0;overflow-wrap:anywhere; }
+.announcement-card h3 { margin:0;font-size:15px;color:#1e3a8a; }
+.announcement-closure { display:inline-block;margin:12px 0 0;padding:6px 10px;border-radius:6px;background:#fff7ed;color:#9a3412;font-size:12px;font-weight:700; }
+.announcement-message { margin:12px 0;white-space:pre-wrap;font-size:14px;line-height:1.6;color:#334155; }
+.announcement-published,.announcement-help { margin:8px 0;color:#64748b;font-size:12px;line-height:1.5; }
+.announcement-compose { margin-top:16px;padding-top:14px;border-top:1px solid #dbeafe; }
+.announcement-compose summary { cursor:pointer;font-size:13px;font-weight:700;color:#1d4ed8; }
+.announcement-compose form { display:grid;gap:12px;margin-top:14px;max-width:720px; }
+.announcement-compose label { display:grid;gap:6px;font-size:12px;font-weight:700;color:#475569; }
+.announcement-compose input,.announcement-compose textarea { width:100%;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:7px;background:white;color:#0f172a;font:inherit;font-size:14px; }
+.announcement-compose textarea { resize:vertical; }
+.announcement-compose button,.announcement-remove { min-height:40px;padding:8px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer; }
+.announcement-compose button { justify-self:start;border:1px solid #1d4ed8;background:#1d4ed8;color:white; }
+.announcement-remove { flex-shrink:0;border:1px solid #cbd5e1;background:white;color:#475569; }
+.announcements button:disabled { opacity:.6;cursor:wait; }
+@media screen and (max-width:720px) {
+ .announcements { margin:12px;padding:12px; }
+ .announcement-card { padding:12px; }
+ .announcements button { min-height:44px; }
+}
+@media print { .announcements { display:none!important; } }
 /* Requested leave and holiday codes */
 .code-km,.code-hk,.code-ct,.code-hka,.code-hko,.code-ctr{border-color:#fca5a5!important;color:#b91c1c!important;background:#fee2e2!important}
 .code-k{border-color:#93c5fd!important;color:#1d4ed8!important;background:#dbeafe!important}
